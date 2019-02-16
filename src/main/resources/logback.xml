@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <contextName>logback</contextName>
+
+    <!--<include resource="org/springframework/boot/logging/logback/base.xml"/>--> <!--基础文件中有实现
+    好的CONSOLE和FILE，直接在Logger中使用就行。要不然就需要自定义appender，再在logger中使用-->
+
+    <property name="log.path" value="logback.log" />
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- <filter class="com.example.logback.filter.MyFilter" /> -->
+        <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">&lt;!&ndash;用ThresholdFilter来过滤掉ERROR级别以下的日志不输出&ndash;&gt;
+            <level>ERROR</level>
+        </filter>-->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+    <appender name="file"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<file>${log.path}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">&lt;!&ndash;TimeBasedRollingPolicy，
+        基于时间的回滚策略,每天将日志归档成一个zip包&ndash;&gt;
+            <fileNamePattern>${log.path}.%d{yyyy-MM-dd}.zip</fileNamePattern>
+            <maxHistory>2</maxHistory>&lt;!&ndash;控制保留的归档文件的最大数量，超出数量就删除旧文件&ndash;&gt;
+            <totalSizeCap>3GB</totalSizeCap >?&lt;!&ndash;用来指定日志文件的上限大小，例如设置为3GB的话，那么到了这个值，
+            就会删除旧的日志，相当于设置                                                                                                                                                           总文件大小（所有的小于30个文件的大小）&ndash;&gt;
+        </rollingPolicy>-->
+
+        <!--SizeAndTimeBasedRollingPolicy策略可以设置单个文件的大小-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 每天一归档 -->
+            <fileNamePattern>mylog-%d{yyyy-MM-dd}.%i.txt</fileNamePattern>
+            <!-- 单个日志文件最多 100MB, 60天的日志周期，最大不能超过20GB -->
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>60</maxHistory>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder><!--日志的输出格式自定义-->
+            <pattern>%date %level [%thread] %logger{36} [%file : %line] %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO"><!--root节点，必选节点，用来指定最基础的日志输出级别,除了logger中覆盖的包外，其他的包内的异常级别为debug-->
+        <appender-ref ref="console" />
+        <!--<appender-ref ref="file" />-->
+    </root>
+    <!--logger节点，可选节点，用来具体指明包的日志输出级别，它将会覆盖root的输出级别，没有覆盖的就参照root-->
+    <logger name="cn.larry.spring.controller" level="WARN" additivity="false">
+        <appender-ref ref="console"/><!--定义congtroller包下的异常输出的位置引用-->
+        <appender-ref ref="file"/>
+    </logger>
+    <logger name="cn.larry.spring.Bean" level="INFO" additivity="false"><!--如果上面（console）已经配置过滤级别了，这里的level将不再生效-->
+        <appender-ref ref="console"/><!--定义Bean包下的异常输出的位置引用-->
+        <appender-ref ref="file"/>
+    </logger>
+
+</configuration>
